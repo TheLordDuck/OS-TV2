@@ -15,9 +15,9 @@ int main(void)
 {
   struct service {
     char plan_name[20];
-    int num_users;
-    double turn_over;
-    _Bool crm;
+    char num_users[6];
+    char turn_over[12];
+    char crm[1];
     struct service *next;
   };
 
@@ -44,17 +44,24 @@ int main(void)
       i++; j++;
     }
 
-    //j=0;
-    //while (j < sizeof(my_service->num_users)) {
-      my_service->num_users = mem_address[i];
-      //i++; j++;
-    //}
-    i=i+sizeof(int);
-    my_service->turn_over = mem_address[i];
-    i=i+sizeof(double);
-    my_service->crm = mem_address[i];
-    i=i+sizeof(_Bool);
-    
+    j=0;
+    while (j < sizeof(my_service->num_users)) {
+      my_service->num_users[j] = mem_address[i];
+      i++; j++;
+    }
+
+    j=0;
+    while (j < sizeof(my_service->turn_over)) {
+      my_service->turn_over[j] = mem_address[i];
+      i++; j++;
+    }
+
+    j=0;
+    while (j < sizeof(my_service->crm)) {
+      my_service->crm[j] = mem_address[i];
+      i++; j++;
+    }
+
     if (current_service == NULL) { //first link
       current_service = my_service;
       service_list = my_service; // save first link address
@@ -69,7 +76,7 @@ int main(void)
 
   // printing product database in memory
   for (i=0; i < 4;i++){
-    printf("%d. service %s, %d, %0.2f, %d\n", i,service_list->plan_name, service_list->num_users, service_list->turn_over, service_list->crm);
+    printf("%d. service %s, %s, %s, %s\n", i, service_list->plan_name, service_list->num_users, service_list->turn_over, service_list->crm);
     service_list = service_list->next;
   }
 }
