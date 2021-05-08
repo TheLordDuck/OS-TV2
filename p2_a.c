@@ -9,6 +9,7 @@
 
 int main() {
    int *shared = mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+   int *num_code = mmap(NULL, 3*sizeof(char), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
    int *num_readers = mmap(NULL,sizeof(int),PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
    sem_t mutex, db;
    int ret = sem_init(&mutex, 1, 1);
@@ -31,7 +32,7 @@ int main() {
             sem_post(&mutex);
             //read
 	    sleep(1);
-            printf("Child (%d) reads shared variable (%d)\n",getpid(),*shared);
+            printf("Child (%d) reads counter (%d) code (%d)\n",getpid(),*shared,*num_code);
             //
             sem_wait(&mutex);
             *num_readers--;
@@ -44,12 +45,27 @@ int main() {
       }
    }
 
+   int x = 0;
+
    while(1){
       sem_wait(&db);
       //write
       sleep(1);
       *shared = *shared + 1;
-      printf("Father (%d) wrote (%d) into shared variable\n",getpid(), *shared);
+      if(x==0){
+         *num_code = 200;
+      } else if(x==1){
+         *num_code = 300;
+      } else if(x==2){
+         *num_code = 400;
+      }
+      x++;
+      if(x==3){
+         x=0;
+      }
+      printf("Father (%d) modify counter (%d) modify code (%d)\n",getpid(), *shared, *num_code);
+      *shared = 0;
+      printf("Father (%d) resets counter (%d)\n", getpid(),*shared);
       //
       sem_post(&db);
    }
